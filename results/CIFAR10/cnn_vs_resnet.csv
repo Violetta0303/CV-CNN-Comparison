@@ -1,0 +1,5 @@
+Metric,CNN_Mean,CNN_StdDev,ResNet_Mean,ResNet_StdDev
+accuracy,0.5455,0.0110,0.5886,0.0098
+precision,0.5492,0.0105,0.6138,0.0129
+recall,0.5455,0.0110,0.5886,0.0098
+f1,0.5442,0.0109,0.5928,0.0124

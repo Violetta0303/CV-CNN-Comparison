@@ -1,0 +1,5 @@
+Metric,BoW_Mean,BoW_StdDev,CNN_Mean,CNN_StdDev
+accuracy,0.2665,0.0064,0.5445,0.0155
+precision,0.2618,0.0072,0.5515,0.0140
+recall,0.2673,0.0067,0.5445,0.0155
+f1,0.2617,0.0058,0.5436,0.0139

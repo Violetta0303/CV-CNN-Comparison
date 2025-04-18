@@ -1,0 +1,14 @@
+Parameter,Value
+Num Clusters,300
+Feature Detector,sift
+Classifier Type,knn
+Total Training Time,210.69 seconds
+Feature Extraction Time,4.97 seconds
+Clustering Time,205.71 seconds
+Classification Time,0.00 seconds
+Total Descriptors,104022
+Avg Descriptors/Image,13.0
+""
+Dataset Information
+dataset,CIFARGS
+num_classes,10

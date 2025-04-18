@@ -1,0 +1,14 @@
+Parameter,Value
+Num Clusters,200
+Feature Detector,sift
+Classifier Type,svm
+Total Training Time,156.53 seconds
+Feature Extraction Time,2.20 seconds
+Clustering Time,118.65 seconds
+Classification Time,35.68 seconds
+Total Descriptors,74007
+Avg Descriptors/Image,33.0
+""
+Dataset Information
+dataset,iCubGS
+num_classes,7

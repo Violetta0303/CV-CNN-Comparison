@@ -1,0 +1,14 @@
+Parameter,Value
+Num Clusters,300
+Feature Detector,sift
+Classifier Type,random_forest
+Total Training Time,160.41 seconds
+Feature Extraction Time,2.68 seconds
+Clustering Time,157.46 seconds
+Classification Time,0.27 seconds
+Total Descriptors,73819
+Avg Descriptors/Image,33.0
+""
+Dataset Information
+dataset,iCubGS
+num_classes,7
