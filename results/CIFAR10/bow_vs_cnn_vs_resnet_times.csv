@@ -1,0 +1,3 @@
+Metric,BoW,CNN,ResNet
+Training Time,764.3823,10.2271,12.5698
+Inference Time,1744997261.3184,0.0000,0.0000

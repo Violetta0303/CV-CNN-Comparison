@@ -153,9 +153,9 @@ def run_grid_search():
     # ------------------- Prepare datasets --------------------------
     dataset_root = download_icubworld(dest_folder='./datasets', version='1.0')
     human_imgs, human_lbls, icub_classes = load_icub_world(
-        os.path.join(dataset_root, 'human', 'train'), version='transformations')
+        os.path.join(dataset_root, 'human', 'train'), version='1.0')
     robot_imgs, robot_lbls, _ = load_icub_world(
-        os.path.join(dataset_root, 'robot', 'train'), version='transformations')
+        os.path.join(dataset_root, 'robot', 'train'), version='1.0')
 
     icub_imgs = np.concatenate((human_imgs, robot_imgs), axis=0)
     icub_lbls = np.concatenate((human_lbls, robot_lbls), axis=0)

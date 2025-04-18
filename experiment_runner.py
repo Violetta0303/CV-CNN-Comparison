@@ -157,8 +157,8 @@ def run_icubworld_1_experiment():
     train_robot_path = os.path.join(dataset_root, 'robot', 'train')
 
     # Load and combine human + robot training data
-    human_images, human_labels, class_names = load_icub_world(train_human_path, version='transformations')
-    robot_images, robot_labels, _ = load_icub_world(train_robot_path, version='transformations')
+    human_images, human_labels, class_names = load_icub_world(train_human_path, version='1.0')
+    robot_images, robot_labels, _ = load_icub_world(train_robot_path, version='1.0')
 
     combined_images = np.concatenate((human_images, robot_images), axis=0)
     combined_labels = np.concatenate((human_labels, robot_labels), axis=0)
@@ -285,35 +285,47 @@ def run_grid_search():
     print("\n=== Running Grid Search for All Datasets ===")
 
     # Define BoW and CNN parameter grids
+    # bow_param_grid = [
+    #     {"num_clusters": 100, "feature_detector": "sift"},
+    #     {"num_clusters": 200, "feature_detector": "sift"},
+    #     {"num_clusters": 300, "feature_detector": "sift"},
+    #     {"num_clusters": 100, "feature_detector": "orb"},
+    #     {"num_clusters": 200, "feature_detector": "orb"},
+    #     {"num_clusters": 300, "feature_detector": "orb"},
+    #     {"num_clusters": 100, "feature_detector": "harris+brief"},
+    #     {"num_clusters": 200, "feature_detector": "harris+brief"},
+    #     {"num_clusters": 300, "feature_detector": "harris+brief"},
+    # ]
+
     bow_param_grid = [
-        {"num_clusters": 100, "feature_detector": "sift"},
-        {"num_clusters": 200, "feature_detector": "sift"},
-        {"num_clusters": 300, "feature_detector": "sift"},
-        {"num_clusters": 100, "feature_detector": "orb"},
-        {"num_clusters": 200, "feature_detector": "orb"},
-        {"num_clusters": 300, "feature_detector": "orb"},
-        {"num_clusters": 100, "feature_detector": "harris"},
-        {"num_clusters": 200, "feature_detector": "harris"},
-        {"num_clusters": 300, "feature_detector": "harris+brief"},
+        {"num_clusters": n, "feature_detector": d}
+        for n in [100, 200, 300]
+        for d in ["sift", "orb", "harris+brief"]
     ]
 
+    # cnn_param_grid = [
+    #     {"batch_size": 16, "lr": 0.001},
+    #     {"batch_size": 32, "lr": 0.001},
+    #     {"batch_size": 64, "lr": 0.001},
+    #     {"batch_size": 128, "lr": 0.001},
+    #     {"batch_size": 16, "lr": 0.0005},
+    #     {"batch_size": 32, "lr": 0.0005},
+    #     {"batch_size": 64, "lr": 0.0005},
+    #     {"batch_size": 128, "lr": 0.0005},
+    # ]
+
     cnn_param_grid = [
-        {"batch_size": 16, "lr": 0.001},
-        {"batch_size": 32, "lr": 0.001},
-        {"batch_size": 64, "lr": 0.001},
-        {"batch_size": 128, "lr": 0.001},
-        {"batch_size": 16, "lr": 0.0005},
-        {"batch_size": 32, "lr": 0.0005},
-        {"batch_size": 64, "lr": 0.0005},
-        {"batch_size": 128, "lr": 0.0005},
+        {"batch_size": b, "lr": lr}
+        for b in [16, 32, 64, 128]
+        for lr in [0.001, 0.0005]
     ]
 
     # Prepare datasets
     dataset_root = download_icubworld(dest_folder='./datasets', version='1.0')
     human_images, human_labels, class_names = load_icub_world(os.path.join(dataset_root, 'human', 'train'),
-                                                              version='transformations')
+                                                              version='1.0')
     robot_images, robot_labels, _ = load_icub_world(os.path.join(dataset_root, 'robot', 'train'),
-                                                    version='transformations')
+                                                    version='1.0')
     icub_images = np.concatenate((human_images, robot_images), axis=0)
     icub_labels = np.concatenate((human_labels, robot_labels), axis=0)
     icub_images, icub_labels = create_balanced_subset(icub_images, icub_labels, n_per_class=400)

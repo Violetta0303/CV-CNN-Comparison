@@ -131,9 +131,9 @@ def run_icubworld_1_experiment(bow_classifier='svm'):
 
     # Load and merge human + robot streams
     human_images, human_labels, class_names = load_icub_world(train_human_path,
-                                                              version='transformations')
+                                                              version='1.0')
     robot_images, robot_labels, _ = load_icub_world(train_robot_path,
-                                                    version='transformations')
+                                                    version='1.0')
 
     combined_images = np.concatenate((human_images, robot_images), axis=0)
     combined_labels = np.concatenate((human_labels, robot_labels), axis=0)
@@ -265,9 +265,9 @@ def run_grid_search():
     # ------------------------------------------------------------------
     dataset_root = download_icubworld(dest_folder='./datasets', version='1.0')
     human_images, human_labels, class_names_icub = load_icub_world(
-        os.path.join(dataset_root, 'human', 'train'), version='transformations')
+        os.path.join(dataset_root, 'human', 'train'), version='1.0')
     robot_images, robot_labels, _ = load_icub_world(
-        os.path.join(dataset_root, 'robot', 'train'), version='transformations')
+        os.path.join(dataset_root, 'robot', 'train'), version='1.0')
 
     icub_images = np.concatenate((human_images, robot_images), axis=0)
     icub_labels = np.concatenate((human_labels, robot_labels), axis=0)

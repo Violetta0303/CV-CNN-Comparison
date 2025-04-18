@@ -26,8 +26,8 @@ def load_icub_world(dataset_path=None, categories=None, max_images_per_category=
     if dataset_path is None:
         raise ValueError("Dataset path not provided")
 
-    # === Transformations version ===
-    if version == 'transformations':
+    # === 1.0 version ===
+    if version == '1.0':
         root = dataset_path
         if not os.path.isdir(root):
             raise FileNotFoundError(f"Expected folder not found: {root}")
@@ -136,66 +136,6 @@ def load_icub_world(dataset_path=None, categories=None, max_images_per_category=
                 all_labels.append(name_to_index[cname])
             else:
                 print(f"Failed to read image: {fpath}")
-
-        # Use np.stack to ensure consistent shape
-        if all_images:
-            images_array = np.stack(all_images)
-            labels_array = np.array(all_labels)
-            print(f"Loaded {len(images_array)} images from {len(class_names)} classes.")
-            return images_array, labels_array, class_names
-        else:
-            raise ValueError("No images could be loaded from the dataset!")
-
-    # === iCubWorld1.0 version ===
-    else:
-        train_root = os.path.join(dataset_path, 'human', 'train')
-        test_root = os.path.join(dataset_path, 'human', 'test')
-
-        if not os.path.isdir(train_root) or not os.path.isdir(test_root):
-            raise FileNotFoundError(f"Expected 'human/train' and 'human/test' folders under {dataset_path}")
-
-        all_images = []
-        all_labels = []
-        class_names = []
-
-        # Consistent image size
-        img_size = (64, 64)
-
-        class_folders = sorted(os.listdir(train_root))
-        if categories:
-            class_folders = [c for c in class_folders if c in categories]
-
-        for class_index, class_name in enumerate(class_folders):
-            class_names.append(class_name)
-            combined_paths = [os.path.join(train_root, class_name), os.path.join(test_root, class_name)]
-
-            for folder in combined_paths:
-                if not os.path.isdir(folder):
-                    continue
-
-                image_files = [f for f in os.listdir(folder) if f.lower().endswith(('.jpg', '.jpeg', '.png', '.ppm'))]
-                print(f"[{class_name}] Found {len(image_files)} images in {folder}")
-
-                if max_images_per_category:
-                    image_files = image_files[:max_images_per_category]
-
-                for fname in image_files:
-                    fpath = os.path.join(folder, fname)
-                    img = cv2.imread(fpath)
-                    if img is not None:
-                        # Ensure 3 channels
-                        if len(img.shape) == 2:
-                            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-                        elif img.shape[2] > 3:
-                            img = img[:, :, :3]
-
-                        # Resize to consistent size
-                        img_resized = cv2.resize(img, img_size)
-
-                        all_images.append(img_resized)
-                        all_labels.append(class_index)
-                    else:
-                        print(f"⚠ Failed to read image: {fpath}")
 
         # Use np.stack to ensure consistent shape
         if all_images:
