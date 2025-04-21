@@ -1,9 +1,11 @@
+import csv
 import os
 import random
 
 import cv2
 import torch
 import numpy as np
+from matplotlib import pyplot as plt
 from tqdm import tqdm
 from dataset_utils import load_icub_world, load_cifar10, create_balanced_subset
 from resnet_model import ResNetModel
@@ -164,7 +166,93 @@ def run_resnet_grid_search():
               f"batch_size={best_combo['params']['batch_size']}, lr={best_combo['params']['lr']} "
               f"(F1 = {best_combo['f1']:.4f})")
 
+def run_resnet_per_class_size_search():
+    print("\n=== ResNet Cross-Validation with Varying Samples per Class ===")
+    for dataset_name, loader_func, default_path, class_count, npc_list in [
+        ("iCubWorld1.0", load_icub_world, "datasets/iCubWorld1.0", 7, [50, 100, 200, 300, 400]),
+        ("CIFAR10", load_cifar10, "datasets/cifar-10-batches-py", 10, [200, 400, 600, 800, 1000])
+    ]:
+        print(f"\n--- Dataset: {dataset_name} ---")
+
+        results_dir = os.path.join("results", dataset_name)
+        figure_dir = os.path.join("figures", dataset_name)
+        os.makedirs(results_dir, exist_ok=True)
+        os.makedirs(figure_dir, exist_ok=True)
+
+        csv_path = os.path.join(results_dir, "resnet_npc.csv")
+        fig_path = os.path.join(figure_dir, "resnet_npc.png")
+
+        all_metrics = {"npc": [], "accuracy": [], "precision": [], "recall": [], "f1": []}
+
+        with open(csv_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["num_per_class", "accuracy", "precision", "recall", "f1"])
+
+            for n_per_class in npc_list:
+                print(f"\n>>> Running CV with {n_per_class} samples per class")
+
+                if dataset_name == "iCubWorld1.0":
+                    human_path = os.path.join(default_path, 'human', 'train')
+                    robot_path = os.path.join(default_path, 'robot', 'train')
+                    human_images, human_labels, class_names = loader_func(human_path, version='1.0')
+                    robot_images, robot_labels, _ = loader_func(robot_path, version='1.0')
+                    images = np.concatenate((human_images, robot_images), axis=0)
+                    labels = np.concatenate((human_labels, robot_labels), axis=0)
+                else:
+                    images, labels, class_names = loader_func(dataset_path=default_path)
+
+                images, labels = create_balanced_subset(images, labels, n_per_class=n_per_class)
+                resized_images = np.array([cv2.resize(img, (64, 64)) for img in images])
+                dataset_info = {'dataset': dataset_name, 'num_classes': len(class_names)}
+
+                model = ResNetModel((3, 64, 64), len(class_names),
+                                    name=f"ResNet18_{dataset_name}_n{n_per_class}",
+                                    dataset_name=dataset_name)
+                model.set_dataset_info(dataset_info)
+                model.optimizer = torch.optim.Adam(model.model.parameters(), lr=0.001)  # Explicit LR setting
+                results = model.cross_validate(
+                    images=resized_images,
+                    labels=labels,
+                    class_names=class_names,
+                    epochs=20,
+                    batch_size=128
+                )
+                model.save(f"models/ResNet18_{dataset_name}_n{n_per_class}.pth")
+
+                writer.writerow([
+                    n_per_class,
+                    results["accuracy_mean"],
+                    results["precision_mean"],
+                    results["recall_mean"],
+                    results["f1_mean"]
+                ])
+
+                all_metrics["npc"].append(n_per_class)
+                all_metrics["accuracy"].append(results["accuracy_mean"])
+                all_metrics["precision"].append(results["precision_mean"])
+                all_metrics["recall"].append(results["recall_mean"])
+                all_metrics["f1"].append(results["f1_mean"])
+
+                print(f">>> F1 score: {results['f1_mean']:.4f}")
+
+        # Plot and save figure
+        plt.figure(figsize=(10, 6))
+        for metric in ["accuracy", "precision", "recall", "f1"]:
+            plt.plot(all_metrics["npc"], all_metrics[metric], marker='o', label=metric.capitalize())
+        plt.title(f"ResNet CV Performance vs Num per Class - {dataset_name}", fontsize=14)
+        plt.xlabel("Number of Samples per Class", fontsize=12)
+        plt.ylabel("Score", fontsize=12)
+        plt.ylim(0, 1)
+        plt.grid(True, linestyle='--', alpha=0.5)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(fig_path, dpi=300)
+        plt.close()
+
+        print(f">>> Figure saved to {fig_path}")
+
 if __name__ == "__main__":
-    run_resnet_icub_cv_experiment()
-    run_resnet_cv_experiment_cifar()
+    # run_resnet_icub_cv_experiment()
+    # run_resnet_cv_experiment_cifar()
     # run_resnet_grid_search()
+    run_resnet_per_class_size_search()
